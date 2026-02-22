@@ -85,19 +85,61 @@ export default function App() {
     }
   };
 
-  const handleUpload = () => {
+  const [uploadingFront, setUploadingFront] = useState(null);
+  const [uploadingBack, setUploadingBack] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [newCardName, setNewCardName] = useState('');
+  const [newCardGrade, setNewCardGrade] = useState('Raw');
+
+  const handleImageUpload = (event, side) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (side === 'front') {
+          setUploadingFront(reader.result);
+        } else {
+          setUploadingBack(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadComplete = () => {
+    if (!uploadingFront) {
+      alert('Please upload at least a front image!');
+      return;
+    }
+
     const newCard = {
       id: cards.length + 1,
-      frontImage: 'https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=400&h=600&fit=crop',
-      backImage: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&h=600&fit=crop',
+      frontImage: uploadingFront,
+      backImage: uploadingBack,
       user: userName,
-      cardName: 'Your New Card',
-      grade: 'Raw',
+      cardName: newCardName || 'My Card',
+      grade: newCardGrade,
       likes: 0,
       comments: []
     };
+    
     setCards([...cards, newCard]);
     setCurrentCardIndex(cards.length);
+    
+    // Reset upload state
+    setUploadingFront(null);
+    setUploadingBack(null);
+    setNewCardName('');
+    setNewCardGrade('Raw');
+    setShowUploadModal(false);
+  };
+
+  const handleCancelUpload = () => {
+    setUploadingFront(null);
+    setUploadingBack(null);
+    setNewCardName('');
+    setNewCardGrade('Raw');
+    setShowUploadModal(false);
   };
 
   return (
@@ -367,7 +409,7 @@ export default function App() {
             <div className="bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-5 border border-blue-500/20">
               <h3 className="text-lg font-bold text-white mb-3">Add to Collection</h3>
               <button
-                onClick={handleUpload}
+                onClick={() => setShowUploadModal(true)}
                 className="w-full py-4 border-2 border-dashed border-blue-500/40 rounded-2xl hover:border-blue-400 hover:bg-blue-800/20 transition-all flex flex-col items-center gap-2 text-blue-200 hover:text-blue-100 group"
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-blue-900/50 border border-blue-400/30">
@@ -397,6 +439,124 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-gradient-to-br from-slate-800 to-blue-900 rounded-3xl shadow-2xl border border-blue-500/30 p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-3xl font-bold text-white mb-6">Upload New Card</h2>
+            
+            {/* Card Details */}
+            <div className="mb-6 space-y-4">
+              <div>
+                <label className="block text-blue-200 font-semibold mb-2">Card Name</label>
+                <input
+                  type="text"
+                  value={newCardName}
+                  onChange={(e) => setNewCardName(e.target.value)}
+                  placeholder="e.g., 1986 Fleer Michael Jordan RC"
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-300/50"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-blue-200 font-semibold mb-2">Grade</label>
+                <select
+                  value={newCardGrade}
+                  onChange={(e) => setNewCardGrade(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                >
+                  <option value="Raw">Raw (Ungraded)</option>
+                  <option value="PSA 10">PSA 10</option>
+                  <option value="PSA 9">PSA 9</option>
+                  <option value="PSA 8">PSA 8</option>
+                  <option value="BGS 9.5">BGS 9.5</option>
+                  <option value="BGS 9">BGS 9</option>
+                  <option value="SGC 10">SGC 10</option>
+                  <option value="SGC 9">SGC 9</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Photo Upload Section */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              {/* Front Image */}
+              <div>
+                <label className="block text-blue-200 font-semibold mb-3">Front Image *</label>
+                {uploadingFront ? (
+                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden border-2 border-blue-500">
+                    <img src={uploadingFront} alt="Front" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setUploadingFront(null)}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-all"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label className="block aspect-[2/3] border-2 border-dashed border-blue-500/40 rounded-xl hover:border-blue-400 hover:bg-blue-800/20 transition-all cursor-pointer flex flex-col items-center justify-center">
+                    <Upload size={48} className="text-blue-400 mb-2" />
+                    <span className="text-blue-200 font-semibold">Choose Front</span>
+                    <span className="text-blue-300 text-sm mt-1">Tap to upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => handleImageUpload(e, 'front')}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Back Image */}
+              <div>
+                <label className="block text-blue-200 font-semibold mb-3">Back Image (Optional)</label>
+                {uploadingBack ? (
+                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden border-2 border-blue-500">
+                    <img src={uploadingBack} alt="Back" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setUploadingBack(null)}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-all"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label className="block aspect-[2/3] border-2 border-dashed border-blue-500/40 rounded-xl hover:border-blue-400 hover:bg-blue-800/20 transition-all cursor-pointer flex flex-col items-center justify-center">
+                    <Upload size={48} className="text-blue-400 mb-2" />
+                    <span className="text-blue-200 font-semibold">Choose Back</span>
+                    <span className="text-blue-300 text-sm mt-1">Tap to upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => handleImageUpload(e, 'back')}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleCancelUpload}
+                className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUploadComplete}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-xl transition-all font-semibold shadow-lg"
+              >
+                Add to Collection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
