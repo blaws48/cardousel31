@@ -304,44 +304,36 @@ export default function App() {
                               alt={`${card.cardName} - back`}
                               className="w-full h-full object-cover"
                             />
-                            {isActive && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleFlip();
-                                }}
-                                className="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-lg border border-blue-400/30 z-10 transition-all"
-                              >
-                                🔄 Front
-                              </button>
-                            )}
                           </div>
                         )}
 
-                        {/* Overlays (only on active card) — must sit on the FRONT face */}
+                        {/* Counter badge — front face only */}
                         {isActive && (
-                          <>
-                            <div
-                              className="absolute bottom-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg border border-blue-400/30 z-10"
-                              style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-                            >
-                              {index + 1} / {totalCards}
-                            </div>
-                            {card.backImage && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleFlip();
-                                }}
-                                className="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-lg border border-blue-400/30 z-10 transition-all"
-                                style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-                              >
-                                🔄 {isFlipped ? 'Front' : 'Flip'}
-                              </button>
-                            )}
-                          </>
+                          <div
+                            className="absolute bottom-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg border border-blue-400/30 z-10"
+                            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                          >
+                            {index + 1} / {totalCards}
+                          </div>
                         )}
                       </div>
+
+                      {/* Flip button — outside the rotating card so it's always visible on both sides */}
+                      {isActive && card.backImage && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFlip();
+                          }}
+                          className="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-lg border border-blue-400/30 transition-all"
+                          style={{
+                            zIndex: 100,
+                            transform: `rotateY(${-angle}deg)`,
+                          }}
+                        >
+                          🔄 {isFlipped ? 'Front' : 'Flip'}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
