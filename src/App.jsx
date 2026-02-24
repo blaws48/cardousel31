@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Upload, User, Users } from 'lucide-react';
+import { Heart, MessageCircle, Upload, User, Users, Palette } from 'lucide-react';
 
 export default function App() {
   const [cards, setCards] = useState([
@@ -47,6 +47,11 @@ export default function App() {
   const [flippedCards, setFlippedCards] = useState({});
   const [newComment, setNewComment] = useState('');
   const [userName] = useState('You');
+
+  // Gradient color state — defaults to blue → gold
+  const [gradientColor1, setGradientColor1] = useState('#1e3a8a');
+  const [gradientColor2, setGradientColor2] = useState('#b45309');
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const currentCard = cards[currentCardIndex];
 
@@ -122,11 +127,10 @@ export default function App() {
       likes: 0,
       comments: []
     };
-    
+
     setCards([...cards, newCard]);
     setCurrentCardIndex(cards.length);
-    
-    // Reset upload state
+
     setUploadingFront(null);
     setUploadingBack(null);
     setNewCardName('');
@@ -143,9 +147,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+    <div
+      className="min-h-screen"
+      style={{ background: `linear-gradient(135deg, ${gradientColor1} 0%, ${gradientColor2} 100%)` }}
+    >
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900/95 to-blue-900/95 backdrop-blur-lg shadow-2xl border-b border-blue-500/20">
+      <div className="bg-black/30 backdrop-blur-lg shadow-2xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50">
@@ -154,6 +161,65 @@ export default function App() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">Cardousel</h1>
           </div>
           <div className="flex items-center gap-3">
+            {/* Color Picker Button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowColorPicker(prev => !prev)}
+                className="flex items-center gap-2 px-5 py-2.5 text-white hover:bg-white/10 rounded-xl transition-all backdrop-blur-sm border border-white/20 hover:border-white/40"
+                title="Customize background colors"
+              >
+                <Palette size={20} />
+                <span className="hidden sm:inline font-medium">Theme</span>
+              </button>
+
+              {/* Color Picker Dropdown */}
+              {showColorPicker && (
+                <div className="absolute right-0 top-14 z-50 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-5 w-64">
+                  <h4 className="text-white font-bold mb-4 text-sm">Background Gradient</h4>
+
+                  <div className="mb-4">
+                    <label className="block text-blue-200 text-xs font-semibold mb-2">Color 1 (Start)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={gradientColor1}
+                        onChange={(e) => setGradientColor1(e.target.value)}
+                        className="w-10 h-10 rounded-lg cursor-pointer border-2 border-white/20 bg-transparent"
+                      />
+                      <span className="text-blue-300 text-xs font-mono">{gradientColor1}</span>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-blue-200 text-xs font-semibold mb-2">Color 2 (End)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={gradientColor2}
+                        onChange={(e) => setGradientColor2(e.target.value)}
+                        className="w-10 h-10 rounded-lg cursor-pointer border-2 border-white/20 bg-transparent"
+                      />
+                      <span className="text-blue-300 text-xs font-mono">{gradientColor2}</span>
+                    </div>
+                  </div>
+
+                  {/* Preview swatch */}
+                  <div
+                    className="w-full h-8 rounded-lg border border-white/20"
+                    style={{ background: `linear-gradient(135deg, ${gradientColor1}, ${gradientColor2})` }}
+                  />
+
+                  {/* Reset to default */}
+                  <button
+                    onClick={() => { setGradientColor1('#1e3a8a'); setGradientColor2('#b45309'); }}
+                    className="mt-3 w-full text-xs text-blue-300 hover:text-white transition-colors py-1"
+                  >
+                    Reset to Blue → Gold
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button className="flex items-center gap-2 px-5 py-2.5 text-blue-100 hover:bg-blue-800/40 rounded-xl transition-all backdrop-blur-sm border border-blue-500/20 hover:border-blue-400/40">
               <Users size={20} />
               <span className="hidden sm:inline font-medium">Friends</span>
@@ -170,10 +236,10 @@ export default function App() {
         {/* Top Section: Carousel (2/3) + Card Stats (1/3) */}
         <div className="grid grid-cols-3 gap-6 mb-8">
           {/* Carousel - Takes 2/3 width */}
-          <div className="col-span-2 bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-8 border border-blue-500/20 overflow-hidden flex items-center justify-center">
+          <div className="col-span-2 bg-black/20 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 p-8 border border-white/10 flex items-center justify-center">
             {/* 3D Carousel Container */}
             <div className="relative w-full h-[380px]" style={{ perspective: '1100px' }}>
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
                 {cards.map((card, index) => {
                   const totalCards = cards.length;
                   const angle = ((index - currentCardIndex) * 360) / totalCards;
@@ -181,38 +247,37 @@ export default function App() {
                   const distance = isActive ? 0 : Math.abs(index - currentCardIndex);
                   const radius = 260;
                   const isFlipped = flippedCards[index] || false;
-                  
+
                   return (
                     <div
                       key={card.id}
                       className="absolute transition-all duration-700 ease-out cursor-pointer"
                       style={{
-                        transform: `
-                          rotateY(${angle}deg) 
-                          translateZ(${radius}px) 
-                          ${isActive ? 'scale(1.05)' : 'scale(0.7)'}
-                        `,
+                        transformStyle: 'preserve-3d',
+                        transform: `rotateY(${angle}deg) translateZ(${radius}px) ${isActive ? 'scale(1.05)' : 'scale(0.7)'}`,
                         opacity: isActive ? 1 : distance === 1 ? 0.7 : distance === 2 ? 0.5 : 0.3,
                         zIndex: isActive ? 50 : 10 - distance,
                         pointerEvents: isActive ? 'auto' : 'none',
                       }}
                       onClick={() => !isActive && setCurrentCardIndex(index)}
                     >
-                      <div 
-                        className="relative rounded-2xl overflow-hidden shadow-2xl transition-all duration-500"
+                      {/* Card inner — NOTE: no overflow-hidden here; it breaks transformStyle: preserve-3d */}
+                      <div
+                        className="relative rounded-2xl shadow-2xl"
                         style={{
                           width: '190px',
                           height: '285px',
                           transformStyle: 'preserve-3d',
-                          transform: `rotateY(${-angle}deg) ${isFlipped ? 'rotateY(180deg)' : ''}`,
-                          transition: 'transform 0.7s',
+                          transform: `rotateY(${-angle}deg) rotateY(${isFlipped ? 180 : 0}deg)`,
+                          transition: 'transform 0.7s ease',
                         }}
                       >
                         {/* Front of Card */}
-                        <div 
+                        <div
                           className="absolute inset-0 bg-gradient-to-br from-slate-900 to-blue-950 border-2 rounded-2xl overflow-hidden"
                           style={{
                             backfaceVisibility: 'hidden',
+                            WebkitBackfaceVisibility: 'hidden',
                             borderColor: isActive ? '#60a5fa' : 'rgba(59, 130, 246, 0.3)',
                           }}
                         >
@@ -222,13 +287,14 @@ export default function App() {
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        
+
                         {/* Back of Card */}
                         {card.backImage && (
-                          <div 
+                          <div
                             className="absolute inset-0 bg-gradient-to-br from-slate-900 to-blue-950 border-2 rounded-2xl overflow-hidden"
                             style={{
                               backfaceVisibility: 'hidden',
+                              WebkitBackfaceVisibility: 'hidden',
                               transform: 'rotateY(180deg)',
                               borderColor: isActive ? '#60a5fa' : 'rgba(59, 130, 246, 0.3)',
                             }}
@@ -240,12 +306,13 @@ export default function App() {
                             />
                           </div>
                         )}
-                        
+
+                        {/* Overlays (only on active card) — must sit on the FRONT face */}
                         {isActive && (
                           <>
-                            <div 
+                            <div
                               className="absolute bottom-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg border border-blue-400/30 z-10"
-                              style={{ backfaceVisibility: 'hidden' }}
+                              style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                             >
                               {index + 1} / {totalCards}
                             </div>
@@ -256,9 +323,9 @@ export default function App() {
                                   toggleFlip();
                                 }}
                                 className="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-lg border border-blue-400/30 z-10 transition-all"
-                                style={{ backfaceVisibility: 'hidden' }}
+                                style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                               >
-                                🔄 Flip
+                                🔄 {isFlipped ? 'Front' : 'Flip'}
                               </button>
                             )}
                           </>
@@ -286,9 +353,9 @@ export default function App() {
           </div>
 
           {/* Card Stats - Takes 1/3 width */}
-          <div className="col-span-1 bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-6 border border-blue-500/20">
+          <div className="col-span-1 bg-black/20 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 p-6 border border-white/10">
             <h3 className="text-xl font-bold text-white mb-6">Card Details</h3>
-            
+
             {/* User Info */}
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-blue-500/20">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/50 border-2 border-blue-400/30">
@@ -347,9 +414,9 @@ export default function App() {
         {/* Bottom Section: Comments (2/3) + Sidebar (1/3) */}
         <div className="grid grid-cols-3 gap-6">
           {/* Comments Section - Takes 2/3 width */}
-          <div className="col-span-2 bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-6 border border-blue-500/20">
+          <div className="col-span-2 bg-black/20 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 p-6 border border-white/10">
             <h3 className="text-xl font-bold text-white mb-4">Comments</h3>
-            
+
             {/* Comments List */}
             <div className="space-y-2 mb-6">
               {currentCard.comments.map((comment, idx) => (
@@ -382,7 +449,7 @@ export default function App() {
           {/* Right Sidebar - Takes 1/3 width */}
           <div className="col-span-1 space-y-6">
             {/* Collection Grid */}
-            <div className="bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-6 border border-blue-500/20">
+            <div className="bg-black/20 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 p-6 border border-white/10">
               <h3 className="text-xl font-bold text-white mb-4">Latest Pickups</h3>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {cards.slice(-9).reverse().map((card, idx) => (
@@ -390,8 +457,8 @@ export default function App() {
                     key={idx}
                     onClick={() => setCurrentCardIndex(cards.indexOf(card))}
                     className={`aspect-[2/3] rounded-xl overflow-hidden hover:ring-2 hover:ring-blue-400 transition-all transform hover:scale-105 shadow-lg border-2 ${
-                      cards.indexOf(card) === currentCardIndex 
-                        ? 'ring-2 ring-blue-500 border-blue-400 scale-105' 
+                      cards.indexOf(card) === currentCardIndex
+                        ? 'ring-2 ring-blue-500 border-blue-400 scale-105'
                         : 'border-blue-600/30'
                     }`}
                   >
@@ -406,7 +473,7 @@ export default function App() {
             </div>
 
             {/* Upload Card */}
-            <div className="bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-5 border border-blue-500/20">
+            <div className="bg-black/20 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 p-5 border border-white/10">
               <h3 className="text-lg font-bold text-white mb-3">Add to Collection</h3>
               <button
                 onClick={() => setShowUploadModal(true)}
@@ -421,7 +488,7 @@ export default function App() {
             </div>
 
             {/* Community Stats */}
-            <div className="bg-gradient-to-br from-slate-800/90 to-blue-900/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/50 p-6 border border-blue-500/20">
+            <div className="bg-black/20 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 p-6 border border-white/10">
               <h3 className="text-xl font-bold text-white mb-4">Community</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-800/40 to-cyan-800/40 rounded-xl border border-blue-500/20">
@@ -445,7 +512,7 @@ export default function App() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-gradient-to-br from-slate-800 to-blue-900 rounded-3xl shadow-2xl border border-blue-500/30 p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-3xl font-bold text-white mb-6">Upload New Card</h2>
-            
+
             {/* Card Details */}
             <div className="mb-6 space-y-4">
               <div>
@@ -458,7 +525,7 @@ export default function App() {
                   className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-300/50"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-blue-200 font-semibold mb-2">Grade</label>
                 <select
